@@ -23,6 +23,8 @@ static NSString *const kRemoteNotificationRegistrationFailed = @"RemoteNotificat
 
 static NSString *const kErrorUnableToRequestPermissions = @"E_UNABLE_TO_REQUEST_PERMISSIONS";
 
+NSDictionary* launchOptions;
+
 #if !TARGET_OS_TV
 @implementation RCTConvert (NSCalendarUnit)
 
@@ -388,7 +390,7 @@ RCT_EXPORT_METHOD(cancelLocalNotifications:(NSDictionary<NSString *, id> *)userI
   for (UILocalNotification *notification in RCTSharedApplication().scheduledLocalNotifications) {
     __block BOOL matchesAll = YES;
     NSDictionary<NSString *, id> *notificationInfo = notification.userInfo;
-    // Note: we do this with a loop instead of just `isEqualToDictionary:`
+    // Note: we launchOptionsdo this with a loop instead of just `isEqualToDictionary:`
     // because we only require that all specified userInfo values match the
     // notificationInfo values - notificationInfo may contain additional values
     // which we don't care about.
@@ -404,15 +406,29 @@ RCT_EXPORT_METHOD(cancelLocalNotifications:(NSDictionary<NSString *, id> *)userI
   }
 }
 
++(void)setLaunchOptions:(NSDictionary*)options {
+  launchOptions = options;
+}
+
 RCT_EXPORT_METHOD(getInitialNotification:(RCTPromiseResolveBlock)resolve
                   reject:(__unused RCTPromiseRejectBlock)reject)
 {
-  NSMutableDictionary<NSString *, id> *initialNotification =
+  
+  NSMutableDictionary<NSString *, id> *initialNotification;
+  UILocalNotification *initialLocalNotification;
+  if(launchOptions == nil) {
+    
+  initialNotification =
   [self.bridge.launchOptions[UIApplicationLaunchOptionsRemoteNotificationKey] mutableCopy];
   
-  UILocalNotification *initialLocalNotification =
+  initialLocalNotification =
   self.bridge.launchOptions[UIApplicationLaunchOptionsLocalNotificationKey];
   
+  } else {
+    initialNotification = [launchOptions[UIApplicationLaunchOptionsRemoteNotificationKey] mutableCopy];
+    
+    initialLocalNotification = launchOptions[UIApplicationLaunchOptionsLocalNotificationKey];
+  }
   if (initialNotification) {
     initialNotification[@"remote"] = @YES;
     resolve(initialNotification);

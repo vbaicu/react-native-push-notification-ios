@@ -20,6 +20,7 @@ typedef void (^RNCRemoteNotificationCallback)(UIBackgroundFetchResult result);
 + (void)didReceiveRemoteNotification:(NSDictionary *)notification fetchCompletionHandler:(RNCRemoteNotificationCallback)completionHandler;
 + (void)didReceiveLocalNotification:(UILocalNotification *)notification;
 + (void)didFailToRegisterForRemoteNotificationsWithError:(NSError *)error;
++ (void)setLaunchOptions:(NSDictionary*)options;
 #endif
 
 @end
